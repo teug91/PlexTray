@@ -51,7 +51,7 @@ namespace PlexTray.Pushbullet
             }
         }
 
-        private static async void GetPush()
+        /*private static async void GetPush()
         {
             var content = new[]
             {
@@ -71,7 +71,7 @@ namespace PlexTray.Pushbullet
 
             PushRecieved?.Invoke(name, null);
             //Debug.WriteLine("Push: " + push);
-        }
+        }*/
 
         private static async void GetPushes()
         {
@@ -92,25 +92,25 @@ namespace PlexTray.Pushbullet
                 foreach (var value in values)
                 {
                     string url = (string)value["file_url"];
-                    Debug.WriteLine("URL: " + url);
+                    //Debug.WriteLine("URL: " + url);
                     string name = GetHTML(url);
 
                     float timestamp = (float)value["created"];
                     //float.TryParse((string)value["created"], out timestamp);
 
                     SettingsManager.SetTimestamp(timestamp);
-                    Debug.WriteLine("Timestamp: " + SettingsManager.GetTimestamp().ToString());
+                    //Debug.WriteLine("Timestamp: " + SettingsManager.GetTimestamp().ToString());
 
                     PushRecieved?.Invoke(name, null);
                     await Task.Delay(5000);
                 }
 
-            else
+            /*else
             {
                 Debug.WriteLine("Values null");
                 Debug.WriteLine(push);
 				Debug.WriteLine("https://api.pushbullet.com/v2/pushes?modified_after=" + (decimal)SettingsManager.GetTimestamp());//SettingsManager.GetTimestamp().ToString(CultureInfo.InvariantCulture));
-			}
+			}*/
         }
 
         private static async Task<string> Get(string requestUri, IEnumerable<KeyValuePair<string, string>> nameValueCollection = null)
@@ -141,7 +141,8 @@ namespace PlexTray.Pushbullet
             foreach (HtmlNode table in doc.DocumentNode.SelectNodes("//table"))
             {
                 //Console.WriteLine("Found: " + table.Id);
-                foreach (HtmlNode row in table.SelectNodes("tr"))
+				if (table.HasChildNodes)
+                foreach (HtmlNode row in table.SelectNodes(".//tr"))
                 {
                     int i = 0;
                     foreach (HtmlNode cell in row.SelectNodes("th|td"))
@@ -150,7 +151,6 @@ namespace PlexTray.Pushbullet
                         {
                             string name = cell.InnerText.Substring(0, cell.InnerText.IndexOf("."));
                             return name;
-                            
                         }
                         i++;
                     }

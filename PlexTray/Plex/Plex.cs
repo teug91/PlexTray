@@ -111,7 +111,7 @@ namespace PlexTray
                 {
                     foreach (PlexLibrary library in plexLibraries.PlexLibraries)
                     {
-                        string mediaKey = await FindItem(Int32.Parse(library.Key), name, isTV = true);
+                        string mediaKey = await FindItem(Int32.Parse(library.Key), name, isTV);
                         if (mediaKey != "")
                         {
                             Process.Start(baseMediaUrl + mediaKey);
