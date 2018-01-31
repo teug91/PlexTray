@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using System.Net;
 
 namespace PlexTray
 {
@@ -21,12 +22,22 @@ namespace PlexTray
             client.Timeout = new TimeSpan(0, 0, 5);
         }
 
-        public static bool IsAvailable()
+        public static async Task<HttpStatusCode> IsAvailable()
         {
-            // TODO
+			string plexHost = SettingsManager.GetHost().ToString();
+			string plexToken = SettingsManager.GetPlexToken();
 
-            return true;
-        }
+			try
+			{
+				var result = await client.GetAsync(plexHost + "system/?X-Plex-Token=" + plexToken);
+				return result.StatusCode;
+			}
+
+			catch (Exception)
+			{
+				return HttpStatusCode.NotFound;
+			}
+		}
 
         /// <summary>
         /// Opens Plex in standard browser.
@@ -76,8 +87,8 @@ namespace PlexTray
         {
             try
             {
-                var result = await client.GetAsync(requestUri);
-                return await result.Content.ReadAsStringAsync();
+				var result = await client.GetAsync(requestUri);
+				return await result.Content.ReadAsStringAsync();
             }
 
             catch (HttpRequestException)

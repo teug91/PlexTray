@@ -30,7 +30,7 @@ namespace PlexTray
             Plex.Init();
             notifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
             notifyIcon.TrayBalloonTipClicked += TrayBalloonTipClicked;
-
+			
             Pushbullet.Communicator.Init();
             Pushbullet.Communicator.PushRecieved += ShowBalloon;
 			//ShowBalloon("Blue Velvet (1986)", null);

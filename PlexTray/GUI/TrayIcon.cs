@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Timers;
 using System.Windows;
 using System.Windows.Input;
+using System.Net;
 
 namespace PlexTray.GUI
 {
@@ -24,28 +25,34 @@ namespace PlexTray.GUI
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        public void SetIcon(object sender, ElapsedEventArgs e)
+        public async void SetIcon(object sender, ElapsedEventArgs e)
         {
-            bool isAvailable = Plex.IsAvailable();
+			HttpStatusCode statusCode = await Plex.IsAvailable();
 
-            if (isAvailable)
-            {
-                if (Icon != "/PlexTray;component/Resources/Plex.ico")
-                {
-                    Icon = "/PlexTray;component/Resources/Plex.ico";
-                    OnPropertyChanged("Icon");
-                }
-            }
+			if (statusCode == HttpStatusCode.OK)
+			{
+				if (Icon != "/PlexTray;component/Resources/Plex.ico")
+				{
+					Icon = "/PlexTray;component/Resources/Plex.ico";
+					OnPropertyChanged("Icon");
+				}
+			}
 
-            else
-            {
-                if (Icon != "/PlexTray;component/Resources/error.ico")
-                {
-                    Icon = "/PlexTray;component/Resources/error.ico";
-                    OnPropertyChanged("Icon");
-                }
-            }
-        }
+			else if (statusCode == HttpStatusCode.Unauthorized)
+			{
+				if (Icon != "/PlexTray;component/Resources/error.ico")
+				{
+					Icon = "/PlexTray;component/Resources/error.ico";
+					OnPropertyChanged("Icon");
+				}
+			}
+
+			else if (Icon != "/PlexTray;component/Resources/error.ico")
+			{
+				Icon = "/PlexTray;component/Resources/error.ico";
+				OnPropertyChanged("Icon");
+			}
+		}
 
         /// <summary>
         ///     Shows a window, if none is already open.
