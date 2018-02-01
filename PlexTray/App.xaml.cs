@@ -6,6 +6,7 @@ using System.Configuration;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -18,14 +19,20 @@ namespace PlexTray
     {
         private TaskbarIcon notifyIcon;
         private string name;
+		private static readonly string id = "{8F6F0AC3-B9A2-46fd-A8CF-72F53E8BDE5F}";
+		private static Mutex mutex = new Mutex(true, id);
 
-        /// <summary>
-        /// Creates tray icon and starts listening for input.
-        /// </summary>
-        /// <param name="e"></param>
-        protected override void OnStartup(StartupEventArgs e)
+		/// <summary>
+		/// Creates tray icon and starts listening for input.
+		/// </summary>
+		/// <param name="e"></param>
+		protected override void OnStartup(StartupEventArgs e)
         {
-            base.OnStartup(e);
+			// Exit application if already running.
+			if (!mutex.WaitOne(TimeSpan.Zero, true))
+				Current.Shutdown();
+
+			base.OnStartup(e);
 
             Plex.Init();
             notifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
@@ -33,8 +40,6 @@ namespace PlexTray
 			
             Pushbullet.Communicator.Init();
             Pushbullet.Communicator.PushRecieved += ShowBalloon;
-			//ShowBalloon("Blue Velvet (1986)", null);
-			//ShowBalloon("One Tree Hill - S04E02 - Things I Forgot at Birth", null);
 		}
 
         private void TrayBalloonTipClicked(object sender, RoutedEventArgs e)

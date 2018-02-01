@@ -60,9 +60,9 @@ namespace PlexTray.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public float Timestamp {
+        public decimal Timestamp {
             get {
-                return ((float)(this["Timestamp"]));
+                return ((decimal)(this["Timestamp"]));
             }
             set {
                 this["Timestamp"] = value;

@@ -25,6 +25,7 @@ namespace PlexTray.Pushbullet
             client = new HttpClient();
             client.DefaultRequestHeaders.Add("Access-Token", SettingsManager.GetPushbulletToken());
             client.Timeout = new TimeSpan(0, 0, 30);
+			GetPushes();
 
             var ws = new WebSocket("wss://stream.pushbullet.com/websocket/" + SettingsManager.GetPushbulletToken());
             ws.OnMessage += (sender, e) =>
@@ -44,34 +45,10 @@ namespace PlexTray.Pushbullet
                 }
                 else if (message.Type == "tickle")
                 {
-                    // New push available.
-                    //GetPush();
                     GetPushes();
                 }
             }
         }
-
-        /*private static async void GetPush()
-        {
-            var content = new[]
-            {
-                new KeyValuePair<string, string>("Access-Token:", SettingsManager.GetPushbulletToken())
-            };
-
-            var push = await Get("https://api.pushbullet.com/v2/pushes?limit=1");
-            //Debug.WriteLine(push);
-            //string url = JsonConvert.DeserializeObject<HtmlUrl>(push).Url;
-
-            dynamic deserializedValue = JsonConvert.DeserializeObject(push);
-            var values = deserializedValue["pushes"];
-            string url = (string) values[0]["file_url"];
-
-            Debug.WriteLine("URL: " + url);
-            string name = GetHTML(url);
-
-            PushRecieved?.Invoke(name, null);
-            //Debug.WriteLine("Push: " + push);
-        }*/
 
         private static async void GetPushes()
         {
@@ -80,10 +57,8 @@ namespace PlexTray.Pushbullet
                 new KeyValuePair<string, string>("Access-Token:", SettingsManager.GetPushbulletToken())
             };
 
-			//var push = await Get("https://api.pushbullet.com/v2/pushes?modified_after=" + (decimal)SettingsManager.GetTimestamp());//SettingsManager.GetTimestamp().ToString(CultureInfo.InvariantCulture));
-			var push = await Get("https://api.pushbullet.com/v2/pushes?limit=1");
-			//Debug.WriteLine(push);
-			//string url = JsonConvert.DeserializeObject<HtmlUrl>(push).Url;
+			var push = await Get("https://api.pushbullet.com/v2/pushes?modified_after=" + SettingsManager.GetTimestamp().ToString(CultureInfo.InvariantCulture));//SettingsManager.GetTimestamp().ToString(CultureInfo.InvariantCulture));
+			//var push = await Get("https://api.pushbullet.com/v2/pushes?limit=1");
 
 			dynamic deserializedValue = JsonConvert.DeserializeObject(push);
             var values = deserializedValue["pushes"];
@@ -92,25 +67,16 @@ namespace PlexTray.Pushbullet
                 foreach (var value in values)
                 {
                     string url = (string)value["file_url"];
-                    //Debug.WriteLine("URL: " + url);
                     string name = GetHTML(url);
 
-                    float timestamp = (float)value["created"];
-                    //float.TryParse((string)value["created"], out timestamp);
+                    var timestamp = (decimal)value["created"];
 
-                    SettingsManager.SetTimestamp(timestamp);
-                    //Debug.WriteLine("Timestamp: " + SettingsManager.GetTimestamp().ToString());
+					if (timestamp > SettingsManager.GetTimestamp())
+						 SettingsManager.SetTimestamp(timestamp + 1);
 
                     PushRecieved?.Invoke(name, null);
                     await Task.Delay(5000);
                 }
-
-            /*else
-            {
-                Debug.WriteLine("Values null");
-                Debug.WriteLine(push);
-				Debug.WriteLine("https://api.pushbullet.com/v2/pushes?modified_after=" + (decimal)SettingsManager.GetTimestamp());//SettingsManager.GetTimestamp().ToString(CultureInfo.InvariantCulture));
-			}*/
         }
 
         private static async Task<string> Get(string requestUri, IEnumerable<KeyValuePair<string, string>> nameValueCollection = null)
@@ -140,19 +106,16 @@ namespace PlexTray.Pushbullet
             doc.LoadHtml(htmlCode);
             foreach (HtmlNode table in doc.DocumentNode.SelectNodes("//table"))
             {
-                //Console.WriteLine("Found: " + table.Id);
 				if (table.HasChildNodes)
                 foreach (HtmlNode row in table.SelectNodes(".//tr"))
                 {
-                    int i = 0;
-                    foreach (HtmlNode cell in row.SelectNodes("th|td"))
+                    foreach (HtmlNode cell in row.SelectNodes("th|td[2]"))
                     {
-                        if (cell.Name == "td" && i == 1)
+                        if (cell.Name == "td")
                         {
                             string name = cell.InnerText.Substring(0, cell.InnerText.IndexOf("."));
                             return name;
                         }
-                        i++;
                     }
                 }
             }

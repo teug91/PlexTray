@@ -22,12 +22,12 @@ namespace PlexTray
             return Settings.Default.PushbulletToken;
         }
 
-        internal static float GetTimestamp()
+        internal static decimal GetTimestamp()
         {
             return Settings.Default.Timestamp;
         }
 
-        internal static void SetTimestamp(float timestamp)
+        internal static void SetTimestamp(decimal timestamp)
         {
             Settings.Default.Timestamp = timestamp;
             Settings.Default.Save();

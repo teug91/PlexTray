@@ -11,7 +11,7 @@
     <Setting Name="PushbulletToken" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="Timestamp" Type="System.Single" Scope="User">
+    <Setting Name="Timestamp" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>
